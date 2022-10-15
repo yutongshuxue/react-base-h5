@@ -1,15 +1,22 @@
+import React, { Fragment,Suspense } from 'react'
+import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom'
 
-
-import { Button } from 'antd-mobile'
-import '../src/assets/styles/index.scss'
+import Home from './pages/home';
+const Login = React.lazy(() => import('./pages/login'))
 
 function App() {
   return (
-    <div>
-      <div className='home'>hello word!!</div>
-      {/* <div className='test_rem'></div> */}
-      <Button color='primary' block>primary</Button>
-    </div>
+    <Fragment>
+      <Router>
+        <Suspense fallback='loading...'>
+          <Switch>
+            <Redirect  exact from='/' to='/home' component={Home}></Redirect>
+            <Route path='/home' component={Home}></Route>
+            <Route path='/login' component={Login}></Route>
+          </Switch>
+        </Suspense>
+      </Router>
+    </Fragment>
   );
 }
 
