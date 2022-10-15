@@ -172,3 +172,11 @@
       }
 
       export default App;
+
+## 8 redux 配置
+
+    安装
+
+      npm i redux react-redux redux-thunk redux-devtools-extension
+
+
