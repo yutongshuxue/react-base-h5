@@ -1,70 +1,145 @@
-# Getting Started with Create React App
+# 1 项目安装
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+    npx create-react-app
 
-## Available Scripts
+# 2 暴露 webpack 配置文件
 
-In the project directory, you can run:
+    npm run eject
 
-### `npm start`
+# 3 移动端适配
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 1 安装 postcss-px-to-viewport
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+    npm i postcss-px-to-viewport
 
-### `npm test`
+## 2 在 webpack.config.js
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+    const px2toviewport = require('postcss-px-to-viewport')
 
-### `npm run build`
+    postcssOptions: {
+            // Necessary for external CSS imports to work
+            // https://github.com/facebook/create-react-app/issues/2677
+            ident: 'postcss',
+            config: false,
+            plugins: !useTailwind
+              ? [
+                  'postcss-flexbugs-fixes',
+                  [
+                    'postcss-preset-env',
+                    {
+                      autoprefixer: {
+                        flexbox: 'no-2009',
+                      },
+                      stage: 3,
+                    },
+                  ],
+                  px2toviewport({ viewportWidth:750 }), //主要加入这里
+                  // Adds PostCSS Normalize as the reset css with default options,
+                  // so that it honors browserslist config in package.json
+                  // which in turn let's users customize the target behavior as per their needs.
+                  'postcss-normalize',
+                ]
+              : [
+                  'tailwindcss',
+                  'postcss-flexbugs-fixes',
+                  [
+                    'postcss-preset-env',
+                    {
+                      autoprefixer: {
+                        flexbox: 'no-2009',
+                      },
+                      stage: 3,
+                    },
+                  ],
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+                ],
+          },
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## 3 样式重置
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+    在index.html中引入
 
-### `npm run eject`
+      <link rel="stylesheet" href="%PUBLIC_URL%/reset.css">
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+## 4 添加 sass 支持
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+    npm install sass -D
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## 5 antd mobile 的支持
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+    npm install --save antd-mobile
 
-## Learn More
+    import { Button } from 'antd-mobile'
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+    就可以使用了
 
-To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Code Splitting
+    1 安装
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+      babel-plugin-import react-app-rewired customize-cra less less-loader
 
-### Analyzing the Bundle Size
+    2 修改package.json中的启动命令(修改了命令导致原来在webconfig中配置的px2vw失效，为此我放弃了按需加载，mobile5.0已经支持tree shaking了，所有体积不会很大。)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+      "scripts": {
+          "start": "react-app-rewired start",
+          "build": "react-app-rewired build",
+          "test": "node scripts/test.js"
+        },
 
-### Making a Progressive Web App
+    3 建立 config-overrides.js文件
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+      const {
+          override,
+          fixBabelImports,
+      } = require("customize-cra");
 
-### Advanced Configuration
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+      module.exports = override(
+          fixBabelImports("import", {
+              libraryName: "antd", libraryDirectory: "es", style: 'css' // change importing css to less
+          }),
+      );
 
-### Deployment
+    启动 最后你发现，原来在webpage.config.js配置的px-vw失效了。头大。。
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+    所有不能外部配置，并想通过改变启动命令来覆盖webpack.config.js的配置来实现。还是得在eject暴露的webconfing.js中配置
 
-### `npm run build` fails to minify
+      在webpack.config.js中全局搜索test: /\.(js|mjs|jsx|ts|tsx)$/,并在plugins的数组最后加入
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+        ["import", { libraryName: "antd", style: "css"}]来实现。这样原来的px2toviewport还是有效的.
+
+        记住启动命令还是node scripts/start.js不要改变
+
+## 6 别名配置
+
+    1 在webpage.config.js中配置
+
+      const resolvePath = relativePath => path.resolve(process.cwd(), relativePath);
+
+      全局搜索alias
+
+        alias:{
+          ...
+          '@': resolvePath('src'),
+          '@c': resolvePath('src/components'),
+          '@a': resolvePath('src/assets'),
+        }
+
+    根目录建立jsconfig.json文件 -- 让vscode认识@符号
+
+      {
+        "compilerOptions": {
+          "baseUrl": "./",
+          "paths": {
+            "@/*":["src/*"],
+            "@s":["src/assets/styles/*"],
+            "@c":["src/components/*"]
+          }
+        }
+      }
+
+    关闭vscode并重启项目
+
+    所有原先config-overrides.js文件不要也罢，该文件是如果你的启动命令是react-app-rewired start,会用你的配置覆盖webconfig.js的配置，但是里面配置的px2toviewport无效了。可以删掉，也可留着，启动命令node scripts/start.js会去找webpack里面的配置。
+
+    到这里，我们reset了样式，配置了px2toviewport 配置了antd-mobile的按需引用 配置了目录别名 继续往下
