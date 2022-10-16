@@ -179,4 +179,30 @@
 
       npm i redux react-redux redux-thunk redux-devtools-extension
 
+## 9 阿里字体图标的使用（symbol 模式支持彩色）
 
+    登录阿里字体图标官网
+
+    添加字体图标到项目
+
+    生成字体图标链接
+
+    在public 中的html中引入
+
+    <script src="//at.alicdn.com/t/c/font_3708816_9xhnzez8ysb.js"></script>
+
+    在全局样式中引入
+
+      .icon {
+        width: 1em;
+        height: 1em;
+        vertical-align: -0.15em;
+        fill: currentColor;
+        overflow: hidden;
+      }
+
+    使用
+
+      <svg className="icon" aria-hidden="true">
+        <use xlinkHref="#icon-jinzita"></use>
+      </svg>

@@ -1,6 +1,11 @@
+import Icon from "@/components/Icon"
 function Home(){
   return(
-    <div className="home">home pages</div>
+    <div>
+      <div className="home">home pagesDSFWE</div>
+        <Icon type='icon-anquanchaxun' style={{fontSize:100}} onClick={()=>alert('hahah')}/>
+    </div>
+    
   )
 }
 
