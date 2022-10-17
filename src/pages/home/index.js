@@ -1,12 +1,10 @@
 import Icon from "@/components/Icon"
 import styles from './index.module.scss'
+import Goback from "@/components/Goback"
 function Home(){
   return(
     <div>
-      <div className="home">home pagesDSFWE</div>
-        <Icon type='icon-anquanchaxun' style={{fontSize:100}} onClick={()=>alert('hahah')}/>
-
-        <div className={styles.test_border}></div>
+      <Goback title="商品列表" extra={'...'} titleStyle={{fontWeight:'bold'}}></Goback>
     </div>
     
   )
